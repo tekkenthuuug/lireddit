@@ -10,6 +10,7 @@ import { buildSchema } from 'type-graphql';
 import mikroConfig from './mikro-orm.config';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
+import cors from 'cors';
 
 import dotenv from 'dotenv';
 import { __prod__ } from './constants';
@@ -24,6 +25,13 @@ dotenv.config();
 
   const RedisStore = connectRedis(session);
   const redisClient = redis.createClient();
+
+  app.use(
+    cors({
+      origin: 'http://localhost:3000',
+      credentials: true,
+    })
+  );
 
   app.use(
     session({
@@ -54,7 +62,10 @@ dotenv.config();
     context: ({ req, res }) => ({ em: orm.em, req, res }),
   });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({
+    app,
+    cors: false,
+  });
 
   app.listen(port, () => {
     console.log('Server is listening on port', port);
