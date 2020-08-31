@@ -13,7 +13,7 @@ import { UserResolver } from './resolvers/user';
 import cors from 'cors';
 
 import dotenv from 'dotenv';
-import { __prod__ } from './constants';
+import { __prod__, COOKIE_NAME } from './constants';
 dotenv.config();
 
 (async () => {
@@ -35,7 +35,7 @@ dotenv.config();
 
   app.use(
     session({
-      name: 'qid',
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
         disableTouch: true,
