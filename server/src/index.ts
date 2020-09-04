@@ -12,6 +12,7 @@ import { COOKIE_NAME, __prod__ } from './constants';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
 import typeOrmConfig from './type-orm.config';
+import { Post } from './entities/Post';
 
 if (!__prod__) {
   dotenv.config();
@@ -19,6 +20,8 @@ if (!__prod__) {
 
 (async () => {
   const conn = await createConnection(typeOrmConfig);
+
+  await conn.runMigrations();
 
   const app = express();
 

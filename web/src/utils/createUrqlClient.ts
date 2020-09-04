@@ -10,6 +10,7 @@ import {
 } from '../generated/graphql';
 import { betterUpdateQuery } from './betterUpdateQuery';
 import Router from 'next/router';
+import cursorPagination from './cursorPagination';
 
 export const errorExchange: Exchange = ({ forward }) => ops$ => {
   return pipe(
@@ -31,6 +32,14 @@ export const createUrqlClient = (ssrExchange: any) => {
     exchanges: [
       dedupExchange,
       cacheExchange({
+        keys: {
+          PaginatedPosts: () => null,
+        },
+        resolvers: {
+          Query: {
+            posts: cursorPagination(),
+          },
+        },
         updates: {
           Mutation: {
             logout: (_result, _, cache) => {
