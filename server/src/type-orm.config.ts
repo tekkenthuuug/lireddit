@@ -1,10 +1,11 @@
 import { ConnectionOptions } from 'typeorm';
 import { Post } from './entities/Post';
 import { User } from './entities/User';
-import path from "path";
+import path from 'path';
 
 import dotenv from 'dotenv';
 import { __prod__ } from './constants';
+import { Updoot } from './entities/Updoot';
 
 if (!__prod__) {
   dotenv.config();
@@ -17,6 +18,6 @@ export default {
   password: process.env.POSTGRES_PASSWORD,
   logging: !__prod__,
   synchronize: true,
-  entities: [Post, User],
-  migrations: [path.join(__dirname, "./migrations/*")];
+  entities: [Post, User, Updoot],
+  migrations: [path.join(__dirname, './migrations/*')],
 } as ConnectionOptions;
