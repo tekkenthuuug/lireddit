@@ -147,31 +147,53 @@ export class PostResolver {
     const { userId } = req.session;
     const updoot = await Updoot.findOne({ where: { userId, postId } });
 
-    const isUpdoot = value !== -1;
-
-    const realValue = isUpdoot ? 1 : -1;
+    // realValue must be [-1,1]
+    const realValue = Math.max(Math.min(1, value), -1);
 
     if (updoot && updoot.value !== realValue) {
       // has voted and changing vote
-      await getConnection().transaction(async tm => {
-        await tm.query(
-          `
-          UPDATE updoot
-          SET value = $1
-          WHERE "postId" = $2 and "userId" = $3
-        `,
-          [realValue, postId, userId]
-        );
+      if (realValue === 0) {
+        // removing vote
+        await getConnection().transaction(async tm => {
+          await tm.query(
+            `
+            DELETE FROM updoot
+            WHERE "postId" = $1 AND "userId" = $2
+          `,
+            [postId, userId]
+          );
 
-        await tm.query(
-          `
-          UPDATE post
-          SET points = points + $1
-          WHERE id = $2;
-        `,
-          [realValue * 2, postId]
-        );
-      });
+          await tm.query(
+            `
+            UPDATE post
+            SET points = points + $1
+            WHERE id = $2;
+          `,
+            [-updoot.value, postId]
+          );
+        });
+      } else if (updoot.value !== realValue) {
+        // changing to opposite vote
+        await getConnection().transaction(async tm => {
+          await tm.query(
+            `
+            UPDATE updoot
+            SET value = $1
+            WHERE "postId" = $2 and "userId" = $3
+          `,
+            [realValue, postId, userId]
+          );
+
+          await tm.query(
+            `
+            UPDATE post
+            SET points = points + $1
+            WHERE id = $2;
+          `,
+            [realValue * 2, postId]
+          );
+        });
+      }
     } else if (!updoot) {
       // never voted before
       await getConnection().transaction(async tm => {

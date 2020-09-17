@@ -73,8 +73,14 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                 if (data.voteStatus === value) {
                   return;
                 }
-                const newPoints =
+
+                let newPoints =
                   (data.points as number) + (!data.voteStatus ? 1 : 2) * value;
+
+                if (value === 0 && typeof data.voteStatus === 'number') {
+                  // removing updoot or downdoot
+                  newPoints = (data.points as number) - data.voteStatus;
+                }
 
                 cache.writeFragment(
                   gql`
