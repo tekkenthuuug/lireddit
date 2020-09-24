@@ -13,6 +13,8 @@ import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
 import typeOrmConfig from './type-orm.config';
 import { Post } from './entities/Post';
+import createUserLoader from './utils/createUserLoader';
+import createUpdootLoader from './utils/createUpdootLoader';
 
 if (!__prod__) {
   dotenv.config();
@@ -61,7 +63,13 @@ if (!__prod__) {
       resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ req, res, redis }),
+    context: ({ req, res }) => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader(),
+      updootLoader: createUpdootLoader(),
+    }),
   });
 
   apolloServer.applyMiddleware({
