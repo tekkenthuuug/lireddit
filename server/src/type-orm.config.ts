@@ -2,20 +2,13 @@ import { ConnectionOptions } from 'typeorm';
 import { Post } from './entities/Post';
 import { User } from './entities/User';
 import path from 'path';
-
-import dotenv from 'dotenv';
+import 'dotenv-safe/config';
 import { __prod__ } from './constants';
 import { Updoot } from './entities/Updoot';
 
-if (!__prod__) {
-  dotenv.config();
-}
-
 export default {
   type: 'postgres',
-  database: process.env.POSTGRES_NAME,
-  username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
+  url: process.env.DATABASE_URL,
   logging: !__prod__,
   synchronize: true,
   entities: [Post, User, Updoot],

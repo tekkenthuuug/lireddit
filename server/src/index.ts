@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server-express';
 import connectRedis from 'connect-redis';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import 'dotenv-safe/config';
 import express from 'express';
 import session from 'express-session';
 import Redis from 'ioredis';
@@ -12,13 +12,8 @@ import { COOKIE_NAME, __prod__ } from './constants';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
 import typeOrmConfig from './type-orm.config';
-import { Post } from './entities/Post';
 import createUserLoader from './utils/createUserLoader';
 import createUpdootLoader from './utils/createUpdootLoader';
-
-if (!__prod__) {
-  dotenv.config();
-}
 
 (async () => {
   const conn = await createConnection(typeOrmConfig);
