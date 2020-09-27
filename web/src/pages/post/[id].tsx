@@ -1,14 +1,15 @@
 import { Box, Heading } from '@chakra-ui/core';
-import { withUrqlClient } from 'next-urql';
+import { withApollo } from '../../utils/withApollo';
 import React from 'react';
 import EditDeletePostButtons from '../../components/EditDeletePostButtons';
 import Layout from '../../components/Layout';
-import { createUrqlClient } from '../../utils/createUrqlClient';
+import { useMeQuery } from '../../generated/graphql';
 import useGetPostFromUrl from '../../utils/useGetPostFromUrl';
 
 const Post = ({}) => {
-  const [{ data, fetching }] = useGetPostFromUrl();
-  if (fetching) {
+  const [{ data: postData, loading }] = useGetPostFromUrl();
+  const { data: meData } = useMeQuery();
+  if (loading) {
     return (
       <Layout>
         <div>Loading...</div>
@@ -16,7 +17,7 @@ const Post = ({}) => {
     );
   }
 
-  if (!data?.post) {
+  if (!postData?.post) {
     return (
       <Layout>
         <Box>Couldn't find a post</Box>
@@ -26,11 +27,13 @@ const Post = ({}) => {
 
   return (
     <Layout>
-      <Heading mb={4}>{data.post.title}</Heading>
-      <Box mb={4}>{data.post?.text}</Box>
-      <EditDeletePostButtons id={data.post.id} />
+      <Heading mb={4}>{postData.post.title}</Heading>
+      <Box mb={4}>{postData.post?.text}</Box>
+      {meData?.me?.id === postData.post.creatorId && (
+        <EditDeletePostButtons id={postData.post.id} />
+      )}
     </Layout>
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(Post);
+export default withApollo({ ssr: true })(Post);

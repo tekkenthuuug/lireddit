@@ -8,7 +8,7 @@ interface Props {
 }
 
 const EditDeletePostButtons: React.FC<Props> = ({ id }) => {
-  const [, deletePost] = useDeletePostMutation();
+  const [deletePost] = useDeletePostMutation();
 
   return (
     <Box>
@@ -19,7 +19,12 @@ const EditDeletePostButtons: React.FC<Props> = ({ id }) => {
         icon='delete'
         aria-label='Delete post'
         onClick={() => {
-          deletePost({ id });
+          deletePost({
+            variables: { id },
+            update: cache => {
+              cache.evict({ id: 'Post:' + id });
+            },
+          });
         }}
       />
     </Box>

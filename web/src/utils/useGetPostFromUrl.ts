@@ -5,8 +5,8 @@ const useGetPostFromUrl = () => {
   const router = useRouter();
   const intId =
     typeof router.query.id === 'string' ? parseInt(router.query.id) : -1;
-  const [postQueryData] = usePostQuery({
-    pause: intId === -1,
+  const postQueryData = usePostQuery({
+    skip: intId === -1,
     variables: {
       id: intId,
     },

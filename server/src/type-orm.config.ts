@@ -10,7 +10,7 @@ export default {
   type: 'postgres',
   url: process.env.DATABASE_URL,
   logging: !__prod__,
-  synchronize: true,
+  // synchronize: true,
   entities: [Post, User, Updoot],
   migrations: [path.join(__dirname, './migrations/*')],
 } as ConnectionOptions;

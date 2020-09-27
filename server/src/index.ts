@@ -18,16 +18,18 @@ import createUpdootLoader from './utils/createUpdootLoader';
 (async () => {
   const conn = await createConnection(typeOrmConfig);
 
-  await conn.runMigrations();
+  // await conn.runMigrations();
 
   const app = express();
 
   const RedisStore = connectRedis(session);
-  const redis = new Redis();
+  const redis = new Redis(process.env.REDIS_URL);
+
+  app.set('trust proxy', 1);
 
   app.use(
     cors({
-      origin: 'http://localhost:3000',
+      origin: process.env.CORS_ORIGIN,
       credentials: true,
     })
   );
@@ -44,14 +46,13 @@ import createUpdootLoader from './utils/createUpdootLoader';
         httpOnly: true,
         secure: __prod__, // cookie only works in https
         sameSite: 'lax', // CSRF
+        domain: __prod__ ? '.maksimdev.com' : undefined,
       },
-      secret: process.env.REDIS_SECRET!,
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
     })
   );
-
-  const port = process.env.PORT || 4000;
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
@@ -72,8 +73,8 @@ import createUpdootLoader from './utils/createUpdootLoader';
     cors: false,
   });
 
-  app.listen(port, () => {
-    console.log('Server is listening on port', port);
+  app.listen(parseInt(process.env.PORT), () => {
+    console.log('Server is listening');
   });
 })().catch(error => {
   console.error(error);

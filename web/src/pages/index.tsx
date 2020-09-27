@@ -1,33 +1,30 @@
 import { Box, Button, Flex, Heading, Link, Stack, Text } from '@chakra-ui/core';
-import { withUrqlClient } from 'next-urql';
+import { withApollo } from '../utils/withApollo';
 import NextLink from 'next/link';
-import { useState } from 'react';
 import EditDeletePostButtons from '../components/EditDeletePostButtons';
 import Layout from '../components/Layout';
 import UpdootSection from '../components/UpdootSection';
 import { useMeQuery, usePostsQuery } from '../generated/graphql';
-import { createUrqlClient } from '../utils/createUrqlClient';
 
 const Index = () => {
-  const [variables, setVariables] = useState({
-    limit: 15,
-    cursor: null as null | string,
+  const { data: meData } = useMeQuery();
+
+  const { data, loading, fetchMore, error, variables: vars } = usePostsQuery({
+    variables: {
+      limit: 15,
+      cursor: null,
+    },
+    notifyOnNetworkStatusChange: true,
   });
 
-  const [{ data: meData }] = useMeQuery();
-
-  const [{ data, fetching }] = usePostsQuery({
-    variables,
-  });
-
-  if (!fetching && !data) {
-    return <div>You got query failed for some reason</div>;
+  if (!loading && !data) {
+    return <div>{error?.message}</div>;
   }
 
   return (
     <Layout>
       <br />
-      {!data && fetching ? (
+      {!data && loading ? (
         <div>Loading...</div>
       ) : (
         <Stack spacing={8}>
@@ -62,12 +59,15 @@ const Index = () => {
         <Flex mt={4} justifyContent='center'>
           <Button
             onClick={() => {
-              setVariables(vars => ({
-                ...vars,
-                cursor: data.posts.posts[data.posts.posts.length - 1].createdAt,
-              }));
+              fetchMore({
+                variables: {
+                  ...vars,
+                  cursor:
+                    data.posts.posts[data.posts.posts.length - 1].createdAt,
+                },
+              });
             }}
-            isLoading={fetching}
+            isLoading={loading}
             width='140px'
           >
             Load more
@@ -78,4 +78,4 @@ const Index = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(Index);
+export default withApollo({ ssr: true })(Index);
